@@ -25,12 +25,10 @@ class PopsgenieBase():
         self._context = kwargs
 
         for key in kwargs:
-            try:
-                setattr(self, key, kwargs[key])
-            except AttributeError as error:
-                if hasattr(self, key):
-                    pass
-                else:
+            if key not in self.skip_attributes:
+                try:
+                    setattr(self, key, kwargs[key])
+                except AttributeError as error:
                     raise AttributeError(f"{error}: {key}")
 
     def __repr__(self):
@@ -126,7 +124,7 @@ class PopsgenieSchedule(PopsgenieBase):
 
     def __init__(self, *args, **kwargs):
         self.__team: Optional[PopsgenieTeam] = None
-        self.__on_calls: Optional[List[PopsgenieUser]] = None
+        self.__on_calls: Optional[List['PopsgenieUser']] = None
         self.__rotations: Optional[List[dict]] = None
         self.lookup_attributes = [
             'name',
@@ -181,7 +179,7 @@ class PopsgenieSchedule(PopsgenieBase):
         return self.__team
 
     @property
-    def on_calls(self) -> List[PopsgenieUser]:
+    def on_calls(self) -> List['PopsgenieUser']:
         """Retrieve users on call for a Schedule
 
         Returns:
@@ -211,13 +209,13 @@ class PopsgenieRotation(PopsgenieBase):
 
     def __init__(self, *args, **kwargs):
         self.__participants: Optional[List[PopsgenieUser]] = None
-        self.lookup_attributes = [ ]
-        self.skip_attributes = []
+        self.lookup_attributes = []
+        self.skip_attributes = ['participants']
 
         super().__init__(*args, **kwargs)
 
     @property
-    def participants(self) -> List[PopsgenieUser]:
+    def participants(self) -> List['PopsgenieUser']:
         """Retrive a list of Opsgenie Users associated
         with the rotation
 
@@ -244,7 +242,7 @@ class PopsgenieTeam(PopsgenieBase):
     logger = logging.getLogger(__name__)
 
     def __init__(self, *args, **kwargs):
-        self.__members: Optional[List[PopsgenieUser]] = None
+        self.__members: Optional[List['PopsgenieUser']] = None
         self.lookup_attributes = [
             'name',
             'description',
@@ -259,7 +257,7 @@ class PopsgenieTeam(PopsgenieBase):
             [self.opsgenie_url, "teams", self.id])
 
     @property
-    def members(self) -> List[PopsgenieUser]:
+    def members(self) -> List['PopsgenieUser']:
         """Retrive a list of Opsgenie Users associated
         with the team
 
@@ -347,10 +345,8 @@ class PopsgenieUser(PopsgenieBase):
 
             self.logger.debug("url=%s", url)
 
-            breakpoint()
             response = self.session.get(url)
 
             self.__contacts = response.json()['data']
 
         return self.__contacts
-

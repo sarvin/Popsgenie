@@ -1,12 +1,14 @@
 """Module containing classes used to query Opsgenie APIs"""
 import logging
-from typing import Dict, List
-
-import requests
 import urllib
 
-import api_classes
-import page
+import requests
+
+#import popsgenie.api_classes
+#import popsgenie.page
+
+from . import api_classes
+from . import page
 
 class Popsgenie():
     """Class for querying Opsgenie at API level"""
@@ -42,12 +44,12 @@ class Popsgenie():
 
         self.__session = session
 
-    def schedules(self, offset: int = 0, limit: int = 100) -> requests.models.Response:
+    def schedules(self, offset: int = 0, limit: int = 20) -> requests.models.Response:
         """used to get a list of opsgenie schedules
 
         Keyword Arguments:
             offset {int} -- offset for pagination (default: {0})
-            limit {int} -- limit for pagination (default: {100})
+            limit {int} -- limit for pagination (default: {20})
 
         Returns:
             requests.models.Response -- object with .json() method
@@ -67,12 +69,12 @@ class Popsgenie():
 
         return pages
 
-    def teams(self, offset: int = 0, limit: int = 100) -> requests.models.Response:
+    def teams(self, offset: int = 0, limit: int = 20) -> requests.models.Response:
         """used to get a list of opsgenie users
 
         Keyword Arguments:
             offset {int} -- offset for pagination (default: {0})
-            limit {int} -- limit for pagination (default: {100})
+            limit {int} -- limit for pagination (default: {20})
 
         Returns:
             requests.models.Response -- object with .json() method
@@ -92,12 +94,12 @@ class Popsgenie():
 
         return pages
 
-    def users(self, offset: int = 0, limit: int = 100) -> requests.models.Response:
+    def users(self, offset: int = 0, limit: int = 20) -> requests.models.Response:
         """used to get a list of opsgenie users
 
         Keyword Arguments:
             offset {int} -- offset for pagination (default: {0})
-            limit {int} -- limit for pagination (default: {100})
+            limit {int} -- limit for pagination (default: {20})
 
         Returns:
             requests.models.Response -- object with .json() method
@@ -116,21 +118,3 @@ class Popsgenie():
             api_classes.PopsgenieUser)
 
         return pages
-
-    @property
-    def deprecated_schedules(self):
-        """Query Opsgenie's schedule's API
-        https://docs.opsgenie.com/docs/schedule-api#list-schedules
-
-        Returns:
-            requests.models.Response -- object with .json() method
-        """
-        response = self._schedules(url)
-
-        schedules = [
-            PopsgenieSchedule(self.session, self.url_base, **schedule)
-            for schedule in response.json()['data']
-        ]
-
-        return schedules
-
