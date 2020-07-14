@@ -1,3 +1,4 @@
+![Python application](https://github.com/sarvin/Popsgenie/workflows/Python%20application/badge.svg)
 # Popsgenie
 Python wrapper for [Opsgenie REST API](https://docs.opsgenie.com/docs/api-overview). Popsgenie objects represent queryable data in Opsgenie; schedules, teams, users etc. Each Popsgenie object has helper attributes to represent and query relationships. For example, a schedule has a relationship with rotations, rotations has a relationship with participants and participants has a relationship with (among others) users. Popsgenie sets up these relationships and allows you to query through objects: `schedule.rotations[0].participants[0].username`.
 
