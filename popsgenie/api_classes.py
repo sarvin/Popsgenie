@@ -228,10 +228,16 @@ class PopsgenieRotation(PopsgenieBase):
             self.__participants = []
 
             for participant in self._context.get('participants', []):
-                # TODO implement escalation, team, none
                 if participant['type'] == 'user':
                     self.__participants.append(
                         PopsgenieUser(self.session, self.opsgenie_url, **participant))
+                elif participant['type'] == 'team':
+                    self.__participants.append(
+                        PopsgenieTeam(self.session, self.opsgenie_url, **participant))
+                else:
+                    # Haven't witnessed participant['type'] == [escalation | none]
+                    # so I'm punting
+                    self.__participants.append(participant)
 
         return self.__participants
 
