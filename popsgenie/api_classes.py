@@ -1,3 +1,4 @@
+"""Represent data in Opsgenie with Popsgenie Classes"""
 import datetime
 import logging
 from typing import Dict, List, Optional
