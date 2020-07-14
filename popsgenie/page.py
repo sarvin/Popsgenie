@@ -1,3 +1,4 @@
+"""Generate an iterator for "paging" throug list calls"""
 import logging
 
 import requests
@@ -37,4 +38,3 @@ class PopsgeniePage():
             for api_data in json['data']]
 
         return api_objects
-
