@@ -1,4 +1,5 @@
 """Module containing classes used to query Opsgenie APIs"""
+from abc import ABC
 import logging
 from urllib import parse
 
@@ -7,7 +8,7 @@ import requests
 from . import api_classes, page
 
 
-class Popsgenie():
+class Popsgenie(ABC):
     """Class for querying Opsgenie at API level"""
     logger = logging.getLogger(__name__)
 
