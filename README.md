@@ -30,7 +30,7 @@ for page in schedule_pages:
 ```
 
 ### Query a single schedule
-`genie.schedules` can also be called with id and identifier_type to query a single schedule. A single PopsgenieSchedule object is returned in a lsit.
+`genie.schedules` can also be called with id and identifier_type to query a single schedule. A single PopsgenieSchedule object is returned in a list.
 
 #### By id
 
@@ -109,7 +109,7 @@ for team in teams:
 ```
 
 ### Query a single team
-`genie.teams` can query by id or name for a single team. A single PopsgenieTeam object is returned in a lsit.
+`genie.teams` can query by id or name for a single team. A single PopsgenieTeam object is returned in a list.
 
 #### By id
 
@@ -189,7 +189,7 @@ len(users)
 ```
 
 ### Query a single user
-`genie.users` can query by id or username for a single user. A single PopsgenieUser object is returned in a lsit.
+`genie.users` can query by id or username for a single user. A single PopsgenieUser object is returned in a list.
 
 #### By id
 
