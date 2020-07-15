@@ -10,16 +10,38 @@ import requests
 class PopsgenieBase(ABC):
     """Base class used to represent datatypes returned
     by the Opsgenie API https://docs.opsgenie.com/docs/api-overview
-    At a minimum each inheriting object needs to implement
+    At a minimum each subclass is required to implement
     self.lookup_attributes and skip_attributes as empty lists.
-    The child object's attributes reflect the fields returned by
+    The subclass's attributes reflect the fields returned by
     Opsgenie *except* when the attribute is included in skip_attributes.
-    If on initialization the child object did not recieve data, for an attribute,
+    If on initialization an instance of a subclass did not recieve data, for an attribute,
     it will be queried if the attribute's name is included in self.lookup_attributes.
     """
-    def __init__(self, session: requests.sessions.Session, opsgenie_url: str, **kwargs):
+    def __init__(
+            self,
+            session: requests.sessions.Session,
+            opsgenie_url: str,
+            resource_name: str = None,
+            **kwargs):
+        """Abstract class for Opsgenie resources
+
+        Args:
+            session (requests.sessions.Session): an pre-authorized session object
+            opsgenie_url (str): The base url for Opsgenie (I don't see this ever being required)
+            resource (str, optional): The Opsgenie resource the class is representing.
+                If the default value (None) is used an instance will throw an error if a resource is
+                queried. In this case an instance of the class should contain all required data.
+                Defaults to None.
+
+            All other key word arguments are used to generate an instance's attributes.
+
+        Raises:
+            AttributeError: thrown when an attribute already exists and cannot be
+                added during instance init.
+        """
         self.__session = session
         self.opsgenie_url = opsgenie_url
+        self.__resource_name: Optional[str] = resource_name
 
 
         # keep an updated list of object's attributes
@@ -75,7 +97,7 @@ class PopsgenieBase(ABC):
         In some cases this can save us a web request.
         """
         if key in self.lookup_attributes:
-            self.query_attributes(self._context_url)
+            self.query_attributes(self.resource_url())
 
         return self.__getattribute__(key)
 
@@ -117,17 +139,30 @@ class PopsgenieBase(ABC):
                 except AttributeError:
                     raise AttributeError(f"can't set attribute: {key}")
 
+    def resource_url(self) -> str:
+        """String declaring the resource's API endpoing
+
+        Returns:
+            str: value suitable for querying resource data
+        """
+        url = "/".join(
+            [self.opsgenie_url, self.__resource_name, self.id]) # type: ignore
+
+        return url
+
 
 class PopsgenieSchedule(PopsgenieBase):
     """Class representing a Schedule in Opsgenie
     https://docs.opsgenie.com/docs/schedule-api
     """
     logger = logging.getLogger(__name__)
+    resource_name = 'schedules'
 
     def __init__(self, *args, **kwargs):
         self.__team: Optional[PopsgenieTeam] = None
         self.__on_calls: Optional[List['PopsgenieUser']] = None
         self.__rotations: Optional[List[PopsgenieRotation]] = None
+
         self.lookup_attributes = [
             'name',
             'description',
@@ -137,10 +172,7 @@ class PopsgenieSchedule(PopsgenieBase):
         ]
         self.skip_attributes = ['rotations']
 
-        super().__init__(*args, **kwargs)
-
-        self._context_url = "/".join(
-            [self.opsgenie_url, "schedules", self.id])
+        super().__init__(*args, resource_name=self.resource_name, **kwargs)
 
     @property
     def rotations(self) -> List['PopsgenieRotation']:
@@ -151,7 +183,7 @@ class PopsgenieSchedule(PopsgenieBase):
             List[dict]: raw response from Opsgenie
         """
         if self.__rotations is None:
-            self.query_attributes(self._context_url)
+            self.query_attributes(self.resource_url())
             self.__rotations = [
                 PopsgenieRotation(self.session, self.opsgenie_url, **rotation_data)
                 for rotation_data in self._context['rotations']
@@ -189,7 +221,7 @@ class PopsgenieSchedule(PopsgenieBase):
         """
         if self.__on_calls is None:
             url = "/".join(
-                [self._context_url, "on-calls"])
+                [self.resource_url(), "on-calls"])
 
             self.logger.debug("url=%s", url)
 
@@ -206,6 +238,8 @@ class PopsgenieSchedule(PopsgenieBase):
 class PopsgenieRotation(PopsgenieBase):
     """Class representing a schedule's rotation in Opsgenie
     https://docs.opsgenie.com/docs/schedule-api#section-schedule-rotation-fields
+
+    This class makes no external queries
     """
     logger = logging.getLogger(__name__)
 
@@ -248,9 +282,11 @@ class PopsgenieTeam(PopsgenieBase):
     https://docs.opsgenie.com/docs/team-api
     """
     logger = logging.getLogger(__name__)
+    resource_name = 'teams'
 
     def __init__(self, *args, **kwargs):
         self.__members: Optional[List['PopsgenieUser']] = None
+
         self.lookup_attributes = [
             'name',
             'description',
@@ -259,10 +295,7 @@ class PopsgenieTeam(PopsgenieBase):
         ]
         self.skip_attributes = ['members']
 
-        super().__init__(*args, **kwargs)
-
-        self._context_url = "/".join(
-            [self.opsgenie_url, "teams", self.id])
+        super().__init__(*args, resource_name=self.resource_name, **kwargs)
 
     @property
     def members(self) -> List['PopsgenieUser']:
@@ -274,7 +307,7 @@ class PopsgenieTeam(PopsgenieBase):
             users associated with a team
         """
         if self.__members is None:
-            self.query_attributes(self._context_url)
+            self.query_attributes(self.resource_url())
             self.__members = [
                 PopsgenieUser(self.session, self.opsgenie_url, **member['user'])
                 for member in self._context.get('members', [])
@@ -288,10 +321,12 @@ class PopsgenieUser(PopsgenieBase):
     https://docs.opsgenie.com/docs/user-api
     """
     logger = logging.getLogger(__name__)
+    resource_name = 'users'
 
     def __init__(self, *args, **kwargs):
         self.__role = None
         self.__contacts: Optional[dict] = None
+
         self.lookup_attributes = [
             'blocked',
             'createdAt',
@@ -305,10 +340,7 @@ class PopsgenieUser(PopsgenieBase):
         ]
         self.skip_attributes = ['role']
 
-        super().__init__(*args, **kwargs)
-
-        self._context_url = "/".join(
-            [self.opsgenie_url, "users", self.id])
+        super().__init__(*args, resource_name=self.resource_name, **kwargs)
 
     @property
     def role(self) -> Dict[str, str]:
@@ -319,7 +351,7 @@ class PopsgenieUser(PopsgenieBase):
             Dict[str, str]: id and name of the role as keys
         """
         if self.__role is None:
-            self.query_attributes(self._context_url, params={'expand': 'contact'})
+            self.query_attributes(self.resource_url(), params={'expand': 'contact'})
 
             self.__role = self._context['role']
 
@@ -349,7 +381,7 @@ class PopsgenieUser(PopsgenieBase):
         """
         if self.__contacts is None:
             url = "/".join(
-                [self._context_url, "contacts"])
+                [self.resource_url(), "contacts"])
 
             self.logger.debug("url=%s", url)
 
