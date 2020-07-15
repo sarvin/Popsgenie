@@ -29,12 +29,16 @@ class PopsgeniePage():
 
         if json.get('paging', {}).get('next'):
             self.url_next = json.get('paging', {}).get('next')
-
         else:
             self.url_next = None
 
-        api_objects = [
-            self.api_class(self.session, self.url_base, **api_data)
-            for api_data in json['data']]
+        api_objects = []
+        if isinstance(json['data'], dict):
+            api_objects = [
+                self.api_class(self.session, self.url_base, **json['data'])]
+        else:
+            api_objects = [
+                self.api_class(self.session, self.url_base, **api_data)
+                for api_data in json['data']]
 
         return api_objects
