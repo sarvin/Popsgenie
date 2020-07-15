@@ -9,14 +9,15 @@ import popsgenie.page
 
 class PopsgeniePage(unittest.TestCase):
     def random_id(self):
-        random_string = ''.join(
-            random.choices(
-                string.ascii_lowercase + string.digits, k=32))
+        random_string = "".join(
+            random.choices(string.ascii_lowercase + string.digits, k=32)
+        )
 
         random_id = (
             f"{random_string[0:8]}-{random_string[8:12]}-"
             f"{random_string[12:16]}-{random_string[16:20]}-"
-            f"{random_string[20:None]}")
+            f"{random_string[20:None]}"
+        )
 
         return random_id
 
@@ -145,60 +146,7 @@ class PopsgeniePage(unittest.TestCase):
 
     def test_query_schedule_by_id(self):
         """Query for schedules by id returns one PopsgenieSchedule
-        elment in list"""
-        # Arrange
-        schedule_id = self.random_id()
-        session = Mock()
-        response = session.get.return_value
-        response.json.return_value = {
-            "data": {
-                "id": schedule_id,
-                "name": "Team Name - On Call",
-                "description": "",
-                "timezone": "America/Chicago",
-                "enabled": False,
-                "ownerTeam": {
-                    "id": self.random_id(),
-                    "name": "Owner Team Name",
-                },
-                "rotations": [
-                    {
-                        "id": self.random_id(),
-                        "name": "Team Rotation",
-                        "startDate": "2020-06-05T13:00:00Z",
-                        "type": "daily",
-                        "length": 1,
-                        "participants": [
-                            {
-                                "type": "user",
-                                "id": self.random_id(),
-                                "username": "mcgluck@notreal.net",
-                            }
-                        ],
-                    }
-                ],
-            },
-            "took": 0.037,
-            "requestId": self.random_id(),
-        }
-
-        pages = popsgenie.page.PopsgeniePage(
-            session,
-            'https://api.opsgenie.com/v2',
-            f"https://api.opsgenie.com/v2/schedules/{schedule_id}?offset=0&limit=20&identifierType=id",
-            popsgenie.api_classes.PopsgenieSchedule,
-        )
-
-        # Act
-        schedules = next(pages)
-
-        # Assert
-        self.assertEqual(len(schedules), 1)
-        self.assertEqual(schedules[0].id, schedule_id)
-
-    def test_query_schedules_does_not_make_more_than_one_request(self):
-        """Query for schedules, by identifier, does not make
-        more than one request to Opsgenie
+        element in list
         """
         # Arrange
         schedule_id = self.random_id()
@@ -211,10 +159,7 @@ class PopsgeniePage(unittest.TestCase):
                 "description": "",
                 "timezone": "America/Chicago",
                 "enabled": False,
-                "ownerTeam": {
-                    "id": self.random_id(),
-                    "name": "Owner Team Name",
-                },
+                "ownerTeam": {"id": self.random_id(), "name": "Owner Team Name",},
                 "rotations": [
                     {
                         "id": self.random_id(),
@@ -238,15 +183,124 @@ class PopsgeniePage(unittest.TestCase):
 
         pages = popsgenie.page.PopsgeniePage(
             session,
-            'https://api.opsgenie.com/v2',
+            "https://api.opsgenie.com/v2",
             f"https://api.opsgenie.com/v2/schedules/{schedule_id}?offset=0&limit=20&identifierType=id",
             popsgenie.api_classes.PopsgenieSchedule,
         )
 
+        schedules = []
         # Act
         for page in pages:
-            continue
+            schedules.extend(page)
 
         # Assert
+        self.assertEqual(len(schedules), 1)
+        self.assertEqual(schedules[0].id, schedule_id)
+        self.assertIsInstance(schedules[0], popsgenie.api_classes.PopsgenieSchedule)
         self.assertEqual(session.get.call_count, 1)
 
+    def test_query_teams_by_id(self):
+        """Query for teams by id returns one PopsgenieTeam
+        element in list
+        """
+        # Arrange
+        team_id = self.random_id()
+        session = Mock()
+        response = session.get.return_value
+        response.json.return_value = {
+            "data": {
+                "description": "random text field entry",
+                "id": team_id,
+                "links": {
+                    "api": f"https://api.opsgenie.com/v2/teams/{team_id}",
+                    "web": f"https://company.xyz.opsgenie.com/teams/dashboard/{team_id}/main",
+                },
+                "members": [
+                    {
+                        "role": "admin",
+                        "user": {
+                            "id": self.random_id(),
+                            "username": "bubbamore@notreal.com",
+                        },
+                    },
+                    {
+                        "role": "admin",
+                        "user": {
+                            "id": self.random_id(),
+                            "username": "jpants@notreal.com",
+                        },
+                    },
+                ],
+                "name": "Team - with a name",
+            },
+            "requestId": self.random_id(),
+            "took": 0.158,
+        }
+
+        pages = popsgenie.page.PopsgeniePage(
+            session,
+            "https://api.opsgenie.com/v2",
+            f"https://api.opsgenie.com/v2/teams/{team_id}?offset=0&limit=20&identifierType=id",
+            popsgenie.api_classes.PopsgenieTeam,
+        )
+
+        teams = []
+        # Act
+        for page in pages:
+            teams.extend(page)
+
+        # Assert
+        self.assertEqual(len(teams), 1)
+        self.assertEqual(teams[0].id, team_id)
+        self.assertIsInstance(teams[0], popsgenie.api_classes.PopsgenieTeam)
+        self.assertEqual(session.get.call_count, 1)
+
+    def test_query_users_by_id(self):
+        """Query for users by id returns one PopsgenieUser
+        element in list
+        """
+        # Arrange
+        user_id = self.random_id()
+        session = Mock()
+        response = session.get.return_value
+        response.json.return_value = {
+            "data": {
+                "blocked": False,
+                "createdAt": "2020-01-07T19:34:00.281Z",
+                "fullName": "Buddy McPantshat",
+                "id": user_id,
+                "locale": "en_US",
+                "role": {"id": "Admin", "name": "Admin"},
+                "timeZone": "America/Chicago",
+                "userAddress": {
+                    "city": "",
+                    "country": "",
+                    "line": "",
+                    "state": "",
+                    "zipCode": "",
+                },
+                "username": "bpantshat@notreal.com",
+                "verified": True,
+            },
+            "expandable": ["contact"],
+            "requestId": self.random_id(),
+            "took": 0.011,
+        }
+
+        pages = popsgenie.page.PopsgeniePage(
+            session,
+            "https://api.opsgenie.com/v2",
+            f"https://api.opsgenie.com/v2/users/{user_id}?offset=0&limit=20&identifierType=id",
+            popsgenie.api_classes.PopsgenieUser,
+        )
+
+        users = []
+        # Act
+        for page in pages:
+            users.extend(page)
+
+        # Assert
+        self.assertEqual(len(users), 1)
+        self.assertEqual(users[0].id, user_id)
+        self.assertIsInstance(users[0], popsgenie.api_classes.PopsgenieUser)
+        self.assertEqual(session.get.call_count, 1)
