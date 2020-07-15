@@ -15,7 +15,7 @@ genie = popsgenie.Popsgenie(
     'YOUR API KEY')
 ```
 
-### Schedules
+## Schedules
 Listing schedules returns a Python iterable object that handles looping over the paged responses. In the example below `schedule_pages` is an iterable that does not hold any data and has not made a query. Looping over `schedule_pages` or calling `next(schedule_pages)` triggers a request against Opsgenie's API.
 
 ```python
@@ -29,7 +29,38 @@ for page in schedule_pages:
 'Team 2 Schedule'
 ```
 
-#### Schedule
+### Query a single schedule
+`genie.schedules` can also be called with id and identifier_type to query a single schedule. A single PopsgenieSchedule object is returned in a lsit.
+
+#### By id
+
+```python
+schedules = next(genie.schedules(identifier='m9r05hi3-limb-icj8-9mb3-051weib9plgh'))
+
+schedules
+[<class 'popsgenie.api_classes.PopsgenieSchedule'>('m9r05hi3-limb-icj8-9mb3-051weib9plgh')]
+
+schedules[0].id
+'m9r05hi3-limb-icj8-9mb3-051weib9plgh'
+```
+
+#### By name
+
+```python
+schedules = []
+pages = genie.schedules(identifier='The Name of a team (doesn\'t have to be url safe)', identifier_type='name')
+
+for page in pages:
+    schedules.extend(page)
+
+schedules
+[<class 'popsgenie.api_classes.PopsgenieSchedule'>('m9r05hi3-limb-icj8-9mb3-051weib9plgh')]
+
+schedules[0].name
+'The Name of a team (doesn\'t have to be url safe)'
+```
+
+### Schedule
 A PopsgenieSchedule object represents an individual [Opsgenie schedule](https://docs.opsgenie.com/docs/schedule-api#get-schedule).
 
 ```python
@@ -64,7 +95,7 @@ rotations[0].id
 'abc1def2-g345-6hi7-jk89-123lm4no5p67'
 ```
 
-### Teams
+## Teams
 Listing teams returns a Python iterable object that handles looping over the paged responses. In the example below `team_pages` is an iterable that does not hold any data and has not made a query. Looping over `team_pages` triggers a request against Opsgenie's API.
 
 ```python
@@ -77,7 +108,38 @@ for team in teams:
 'The second team'
 ```
 
-#### Team
+### Query a single team
+`genie.teams` can query by id or name for a single team. A single PopsgenieTeam object is returned in a lsit.
+
+#### By id
+
+```python
+team = next(genie.teams(identifier='rungzd54-hc3l-t7i9-sqf5-4swjxnzkbejv'))
+
+users
+[<class 'popsgenie.api_classes.PopsgenieTeam'>('rungzd54-hc3l-t7i9-sqf5-4swjxnzkbejv')]
+
+users[0].id
+'rungzd54-hc3l-t7i9-sqf5-4swjxnzkbejv'
+```
+
+#### By username
+
+```python
+users = []
+pages = genie.schedules(identifier='The Name of a team (doesn\'t have to be url safe)', identifier_type='name')
+
+for page in pages:
+    users.extend(page)
+
+users
+[<class 'popsgenie.api_classes.PopsgenieTeam'>('rungzd54-hc3l-t7i9-sqf5-4swjxnzkbejv')]
+
+schedules[0].name
+'The Name of a team (doesn\'t have to be url safe)'
+```
+
+### Team
 A PopsgenieTeam object represents an individual [Opsgenie team](https://docs.opsgenie.com/docs/team-api#get-team).
 
 ```python
@@ -103,7 +165,7 @@ team.members
  <class 'popsgenie.api_classes.PopsgenieUser'>('abc1def2-g345-6hi7-jk89-123lm4no5p67')]
 ```
 
-### Users
+## Users
 Listing users returns a Python iterable object that handles looping over the paged responses. In the example below `user_pages` is an iterable that does not hold any data and has not made a query. Looping over `user_pages` triggers a request against Opsgenie's API.
 
 ```python
@@ -126,7 +188,38 @@ len(users)
 134
 ```
 
-#### User
+### Query a single user
+`genie.users` can query by id or username for a single user. A single PopsgenieUser object is returned in a lsit.
+
+#### By id
+
+```python
+users = next(genie.users(identifier='7l3d9qrz-he0w-ucwu-206e-37kmawd1ucqc'))
+
+users
+[<class 'popsgenie.api_classes.PopsgenieUser'>('7l3d9qrz-he0w-ucwu-206e-37kmawd1ucqc')]
+
+users[0].id
+'7l3d9qrz-he0w-ucwu-206e-37kmawd1ucqc'
+```
+
+#### By username
+
+```python
+users = []
+pages = genie.schedules(identifier='The Name of a user (doesn\'t have to be url safe)', identifier_type='username')
+
+for page in pages:
+    users.extend(page)
+
+users
+[<class 'popsgenie.api_classes.PopsgenieUser'>('m9r05hi3-limb-icj8-9mb3-051weib9plgh')]
+
+schedules[0].name
+'The Name of a user (doesn\'t have to be url safe)'
+```
+
+### User
 A PopsgenieUser object represents an individual [Opsgenie user](https://docs.opsgenie.com/docs/user-api#get-user).
 
 ```python

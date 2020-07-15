@@ -31,7 +31,6 @@ class Popsgenie():
         """
         return self.__session
 
-
     def schedules(
             self,
             identifier: str = None,
@@ -73,21 +72,37 @@ class Popsgenie():
 
         return pages
 
-    def teams(self, offset: int = 0, limit: int = 20) -> page.PopsgeniePage:
-        """used to get a list of opsgenie users
+    def teams(
+            self,
+            identifier: str = None,
+            identifier_type: str = None,
+            offset: int = 0,
+            limit: int = 20) -> page.PopsgeniePage:
+        """List opsgenie teams in the form of PopsgenieTeam objects
 
-        Keyword Arguments:
-            offset {int} -- offset for pagination (default: {0})
-            limit {int} -- limit for pagination (default: {20})
+        Args:
+            identifier (str, optional): The name or id of a team. Defaults to None.
+            identifier_type (str, optional): The type of identifier used.
+                Values are either 'name' or 'id'. Defaults to None.
+            offset (int, optional): offset for pagination. Defaults to 0.
+            limit (int, optional): limit for pagination. Defaults to 20.
 
         Returns:
-            requests.models.Response -- object with .json() method
+            page.PopsgeniePage: iterable that returns lists of PopsgenieTeam objects
         """
-        query_string = parse.urlencode({
+        url_parts = [self.url_base, "teams"]
+        parameters: dict = {
             "offset": offset,
-            "limit": limit})
+            "limit": limit}
 
-        url = "/".join([self.url_base, "teams"])
+        if identifier_type in ['id', 'name']:
+            parameters['identifierType'] = identifier_type
+        if identifier:
+            url_parts.append(parse.quote(identifier))
+
+        query_string = parse.urlencode(parameters)
+
+        url = "/".join(url_parts)
         url = url + '?' + query_string
 
         pages = page.PopsgeniePage(
@@ -98,21 +113,37 @@ class Popsgenie():
 
         return pages
 
-    def users(self, offset: int = 0, limit: int = 20) -> page.PopsgeniePage:
-        """used to get a list of opsgenie users
+    def users(
+            self,
+            identifier: str = None,
+            identifier_type: str = None,
+            offset: int = 0,
+            limit: int = 20) -> page.PopsgeniePage:
+        """List opsgenie users in the form of PopsgenieUser objects
 
-        Keyword Arguments:
-            offset {int} -- offset for pagination (default: {0})
-            limit {int} -- limit for pagination (default: {20})
+        Args:
+            identifier (str, optional): The name or id of a user. Defaults to None.
+            identifier_type (str, optional): The type of identifier used.
+                Values are either 'username' or 'id'. Defaults to None.
+            offset (int, optional): offset for pagination. Defaults to 0.
+            limit (int, optional): limit for pagination. Defaults to 20.
 
         Returns:
-            requests.models.Response -- object with .json() method
+            page.PopsgeniePage: iterable that returns lists of PopsgenieUser objects
         """
-        query_string = parse.urlencode({
+        url_parts = [self.url_base, "users"]
+        parameters: dict = {
             "offset": offset,
-            "limit": limit})
+            "limit": limit}
 
-        url = "/".join([self.url_base, "users"])
+        if identifier_type in ['id', 'username']:
+            parameters['identifierType'] = identifier_type
+        if identifier:
+            url_parts.append(parse.quote(identifier))
+
+        query_string = parse.urlencode(parameters)
+
+        url = "/".join(url_parts)
         url = url + '?' + query_string
 
         pages = page.PopsgeniePage(
