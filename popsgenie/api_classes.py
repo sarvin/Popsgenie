@@ -1,4 +1,5 @@
 """Represent data in Opsgenie with Popsgenie Classes"""
+from abc import ABC
 import datetime
 import logging
 from typing import Dict, List, Optional, Union
@@ -6,7 +7,7 @@ from typing import Dict, List, Optional, Union
 import requests
 
 
-class PopsgenieBase():
+class PopsgenieBase(ABC):
     """Base class used to represent datatypes returned
     by the Opsgenie API https://docs.opsgenie.com/docs/api-overview
     At a minimum each inheriting object needs to implement
