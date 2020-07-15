@@ -1,7 +1,7 @@
 """Represent data in Opsgenie with Popsgenie Classes"""
 import datetime
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import requests
 
@@ -126,7 +126,7 @@ class PopsgenieSchedule(PopsgenieBase):
     def __init__(self, *args, **kwargs):
         self.__team: Optional[PopsgenieTeam] = None
         self.__on_calls: Optional[List['PopsgenieUser']] = None
-        self.__rotations: Optional[List[dict]] = None
+        self.__rotations: Optional[List[PopsgenieRotation]] = None
         self.lookup_attributes = [
             'name',
             'description',
@@ -142,7 +142,7 @@ class PopsgenieSchedule(PopsgenieBase):
             [self.opsgenie_url, "schedules", self.id])
 
     @property
-    def rotations(self) -> List[dict]:
+    def rotations(self) -> List['PopsgenieRotation']:
         """Returns the raw data for a Opsgenie rotation
         associated with a schedule
 
@@ -209,14 +209,14 @@ class PopsgenieRotation(PopsgenieBase):
     logger = logging.getLogger(__name__)
 
     def __init__(self, *args, **kwargs):
-        self.__participants: Optional[List[PopsgenieUser]] = None
+        self.__participants: Optional[List[Union['PopsgenieTeam', 'PopsgenieUser', dict]]] = None
         self.lookup_attributes = []
         self.skip_attributes = ['participants']
 
         super().__init__(*args, **kwargs)
 
     @property
-    def participants(self) -> List['PopsgenieUser']:
+    def participants(self) -> List[Union['PopsgenieTeam', 'PopsgenieUser', dict]]:
         """Retrive a list of Opsgenie Users associated
         with the rotation
 
@@ -236,7 +236,7 @@ class PopsgenieRotation(PopsgenieBase):
                         PopsgenieTeam(self.session, self.opsgenie_url, **participant))
                 else:
                     # Haven't witnessed participant['type'] == [escalation | none]
-                    # so I'm punting
+                    # For now, I have to punt and return the dict
                     self.__participants.append(participant)
 
         return self.__participants
