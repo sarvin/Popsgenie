@@ -4,8 +4,9 @@ from urllib import parse
 
 import requests
 
-from . import api_classes, page
+from . import api_classes, tools
 
+#logger = logging.getLogger('popsgenie')
 
 class Popsgenie():
     """Class for querying Opsgenie at API level"""
@@ -36,7 +37,7 @@ class Popsgenie():
             identifier: str = None,
             identifier_type: str = None,
             offset: int = 0,
-            limit: int = 20) -> page.PopsgeniePage:
+            limit: int = 20) -> tools.PopsgeniePage:
         """List opsgenie schedules in the form of PopsgenieSchedule objects
 
         Args:
@@ -64,11 +65,11 @@ class Popsgenie():
         url = "/".join(url_parts)
         url = url + '?' + query_string
 
-        pages = page.PopsgeniePage(
-            self.session,
-            self.url_base,
-            url,
-            api_classes.PopsgenieSchedule)
+        pages = tools.PopsgeniePage(
+            session=self.session,
+            url_base=self.url_base,
+            url=url,
+            PopsgenieClass=api_classes.PopsgenieSchedule)
 
         return pages
 
@@ -77,7 +78,7 @@ class Popsgenie():
             identifier: str = None,
             identifier_type: str = None,
             offset: int = 0,
-            limit: int = 20) -> page.PopsgeniePage:
+            limit: int = 20) -> tools.PopsgeniePage:
         """List opsgenie teams in the form of PopsgenieTeam objects
 
         Args:
@@ -105,11 +106,11 @@ class Popsgenie():
         url = "/".join(url_parts)
         url = url + '?' + query_string
 
-        pages = page.PopsgeniePage(
-            self.session,
-            self.url_base,
-            url,
-            api_classes.PopsgenieTeam)
+        pages = tools.PopsgeniePage(
+            session=self.session,
+            url_base=self.url_base,
+            url=url,
+            PopsgenieClass=api_classes.PopsgenieTeam)
 
         return pages
 
@@ -118,7 +119,7 @@ class Popsgenie():
             identifier: str = None,
             identifier_type: str = None,
             offset: int = 0,
-            limit: int = 20) -> page.PopsgeniePage:
+            limit: int = 20) -> tools.PopsgeniePage:
         """List opsgenie users in the form of PopsgenieUser objects
 
         Args:
@@ -146,10 +147,10 @@ class Popsgenie():
         url = "/".join(url_parts)
         url = url + '?' + query_string
 
-        pages = page.PopsgeniePage(
-            self.session,
-            self.url_base,
-            url,
-            api_classes.PopsgenieUser)
+        pages = tools.PopsgeniePage(
+            session=self.session,
+            url_base=self.url_base,
+            url=url,
+            PopsgenieClass=api_classes.PopsgenieUser)
 
         return pages

@@ -1,4 +1,4 @@
-"""Generate an iterator for "paging" throug list calls"""
+"""Generate an iterator for "paging" through list calls"""
 import logging
 
 import requests
@@ -22,23 +22,26 @@ class PopsgeniePage():
             self.url_next = self.url_start
             raise StopIteration
 
-        self.logger.debug("url=%s", self.url_next)
+        self.logger.debug("url_next=%s", self.url_next)
 
         response = self.session.get(self.url_next)
         json = response.json()
 
-        if json.get('paging', {}).get('next'):
-            self.url_next = json.get('paging', {}).get('next')
-        else:
-            self.url_next = None
+        self.url_next = json.get('paging', {}).get('next', None)
 
         api_objects = []
         if isinstance(json['data'], dict):
             api_objects = [
-                self.api_class(self.session, self.url_base, **json['data'])]
+                self.api_class(
+                    session=self.session,
+                    opsgenie_url=self.url_base,
+                    **json['data'])]
         else:
             api_objects = [
-                self.api_class(self.session, self.url_base, **api_data)
+                self.api_class(
+                    session=self.session,
+                    opsgenie_url=self.url_base,
+                    **api_data)
                 for api_data in json['data']]
 
         return api_objects
