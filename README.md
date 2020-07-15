@@ -123,19 +123,19 @@ users[0].id
 'rungzd54-hc3l-t7i9-sqf5-4swjxnzkbejv'
 ```
 
-#### By username
+#### By name
 
 ```python
-users = []
-pages = genie.schedules(identifier='The Name of a team (doesn\'t have to be url safe)', identifier_type='name')
+teams = []
+pages = genie.teams(identifier='The Name of a team (doesn\'t have to be url safe)', identifier_type='name')
 
 for page in pages:
-    users.extend(page)
+    teams.extend(page)
 
-users
+teams
 [<class 'popsgenie.api_classes.PopsgenieTeam'>('rungzd54-hc3l-t7i9-sqf5-4swjxnzkbejv')]
 
-schedules[0].name
+teams[0].name
 'The Name of a team (doesn\'t have to be url safe)'
 ```
 
@@ -207,7 +207,7 @@ users[0].id
 
 ```python
 users = []
-pages = genie.schedules(identifier='The Name of a user (doesn\'t have to be url safe)', identifier_type='username')
+pages = genie.users(identifier='The Name of a user (doesn\'t have to be url safe)', identifier_type='username')
 
 for page in pages:
     users.extend(page)
@@ -215,7 +215,7 @@ for page in pages:
 users
 [<class 'popsgenie.api_classes.PopsgenieUser'>('m9r05hi3-limb-icj8-9mb3-051weib9plgh')]
 
-schedules[0].name
+users[0].name
 'The Name of a user (doesn\'t have to be url safe)'
 ```
 
