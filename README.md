@@ -10,9 +10,7 @@ A popsgenie.Popsgenie object is used to make all the API calls. To instantiate a
 ```python
 import popsgenie
 
-genie = popsgenie.Popsgenie(
-    'https://api.opsgenie.com/v2',
-    'YOUR API KEY')
+genie = popsgenie.Popsgenie('YOUR API KEY')
 ```
 
 ## Schedules
@@ -71,7 +69,8 @@ schedule.name
 All JSON Body Fields are represented except for rotation and on_calls. The has attributes that represent the relationships between a schedule and [rotation](https://docs.opsgenie.com/docs/schedule-api#section-schedule-rotation-fields), [team](https://docs.opsgenie.com/docs/team-api#get-team) and [on_calls](https://docs.opsgenie.com/docs/user-api).
 
 ```python
-rotations = schedule.rotations
+schedule.rotations
+[<class 'popsgenie.api_classes.PopsgenieRotation'>('dxbby0qb-zrdu-v430-g7s4-w6i9pk7gvklz')]
 
 schedule.team
 <class 'popsgenie.api_classes.PopsgenieTeam'>('2a3456b7-c891-2de3-4fgh-i5j6k7891l23')

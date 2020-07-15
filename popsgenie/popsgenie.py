@@ -11,7 +11,7 @@ class Popsgenie():
     """Class for querying Opsgenie at API level"""
     logger = logging.getLogger(__name__)
 
-    def __init__(self, opsgenie_url: str, api_key: str):
+    def __init__(self, api_key: str, opsgenie_url: str = 'https://api.opsgenie.com/v2'):
         session = requests.Session()
         session.headers.update(
             {"Authorization": api_key}
@@ -19,7 +19,7 @@ class Popsgenie():
 
         self.__session = session
 
-        self.url_base = opsgenie_url # 'https://api.opsgenie.com/v2'
+        self.url_base = opsgenie_url
 
     @property
     def session(self) -> requests.sessions.Session:
