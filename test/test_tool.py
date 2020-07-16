@@ -3,7 +3,7 @@ import string
 import unittest
 from unittest.mock import Mock
 
-import popsgenie.api_classes
+import popsgenie.resource
 import popsgenie.tool
 
 
@@ -135,7 +135,7 @@ class PopsgeniePage(unittest.TestCase):
             session,
             "https://api.opsgenie.com/v2",
             "https://api.opsgenie.com/v2/users?limit=2&offset=2",
-            popsgenie.api_classes.PopsgenieUser,
+            popsgenie.resource.User,
         )
 
         users = [user for users in pages for user in users]
@@ -185,7 +185,7 @@ class PopsgeniePage(unittest.TestCase):
             session,
             "https://api.opsgenie.com/v2",
             f"https://api.opsgenie.com/v2/schedules/{schedule_id}?offset=0&limit=20&identifierType=id",
-            popsgenie.api_classes.PopsgenieSchedule,
+            popsgenie.resource.Schedule,
         )
 
         schedules = []
@@ -196,7 +196,7 @@ class PopsgeniePage(unittest.TestCase):
         # Assert
         self.assertEqual(len(schedules), 1)
         self.assertEqual(schedules[0].id, schedule_id)
-        self.assertIsInstance(schedules[0], popsgenie.api_classes.PopsgenieSchedule)
+        self.assertIsInstance(schedules[0], popsgenie.resource.Schedule)
         self.assertEqual(session.get.call_count, 1)
 
     def test_query_teams_by_id(self):
@@ -241,7 +241,7 @@ class PopsgeniePage(unittest.TestCase):
             session,
             "https://api.opsgenie.com/v2",
             f"https://api.opsgenie.com/v2/teams/{team_id}?offset=0&limit=20&identifierType=id",
-            popsgenie.api_classes.PopsgenieTeam,
+            popsgenie.resource.Team,
         )
 
         teams = []
@@ -252,7 +252,7 @@ class PopsgeniePage(unittest.TestCase):
         # Assert
         self.assertEqual(len(teams), 1)
         self.assertEqual(teams[0].id, team_id)
-        self.assertIsInstance(teams[0], popsgenie.api_classes.PopsgenieTeam)
+        self.assertIsInstance(teams[0], popsgenie.resource.Team)
         self.assertEqual(session.get.call_count, 1)
 
     def test_query_users_by_id(self):
@@ -291,7 +291,7 @@ class PopsgeniePage(unittest.TestCase):
             session,
             "https://api.opsgenie.com/v2",
             f"https://api.opsgenie.com/v2/users/{user_id}?offset=0&limit=20&identifierType=id",
-            popsgenie.api_classes.PopsgenieUser,
+            popsgenie.resource.User,
         )
 
         users = []
@@ -302,5 +302,5 @@ class PopsgeniePage(unittest.TestCase):
         # Assert
         self.assertEqual(len(users), 1)
         self.assertEqual(users[0].id, user_id)
-        self.assertIsInstance(users[0], popsgenie.api_classes.PopsgenieUser)
+        self.assertIsInstance(users[0], popsgenie.resource.User)
         self.assertEqual(session.get.call_count, 1)

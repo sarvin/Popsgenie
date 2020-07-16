@@ -4,7 +4,7 @@ from urllib import parse
 
 import requests
 
-from . import api_classes, tool
+from . import resource, tool
 
 #logger = logging.getLogger('popsgenie')
 
@@ -38,7 +38,7 @@ class Popsgenie():
             identifier_type: str = None,
             offset: int = 0,
             limit: int = 20) -> tool.Pages:
-        """List opsgenie schedules in the form of PopsgenieSchedule objects
+        """List opsgenie schedules in the form of Schedule objects
 
         Args:
             identifier (str, optional): The name or id of a schedule. Defaults to None.
@@ -48,7 +48,7 @@ class Popsgenie():
             limit (int, optional): limit for pagination. Defaults to 20.
 
         Returns:
-            page.PopsgeniePage: iterable that returns lists of PopsgenieSchedule objects
+            page.PopsgeniePage: iterable that returns lists of Schedule objects
         """
         url_parts = [self.url_base, "schedules"]
         parameters: dict = {
@@ -69,7 +69,7 @@ class Popsgenie():
             session=self.session,
             url_base=self.url_base,
             url=url,
-            PopsgenieClass=api_classes.PopsgenieSchedule)
+            PopsgenieClass=resource.Schedule)
 
         return pages
 
@@ -79,7 +79,7 @@ class Popsgenie():
             identifier_type: str = None,
             offset: int = 0,
             limit: int = 20) -> tool.Pages:
-        """List opsgenie teams in the form of PopsgenieTeam objects
+        """List opsgenie teams in the form of Team objects
 
         Args:
             identifier (str, optional): The name or id of a team. Defaults to None.
@@ -89,7 +89,7 @@ class Popsgenie():
             limit (int, optional): limit for pagination. Defaults to 20.
 
         Returns:
-            page.PopsgeniePage: iterable that returns lists of PopsgenieTeam objects
+            page.PopsgeniePage: iterable that returns lists of Team objects
         """
         url_parts = [self.url_base, "teams"]
         parameters: dict = {
@@ -110,7 +110,7 @@ class Popsgenie():
             session=self.session,
             url_base=self.url_base,
             url=url,
-            PopsgenieClass=api_classes.PopsgenieTeam)
+            PopsgenieClass=resource.Team)
 
         return pages
 
@@ -120,7 +120,7 @@ class Popsgenie():
             identifier_type: str = None,
             offset: int = 0,
             limit: int = 20) -> tool.Pages:
-        """List opsgenie users in the form of PopsgenieUser objects
+        """List opsgenie users in the form of User objects
 
         Args:
             identifier (str, optional): The name or id of a user. Defaults to None.
@@ -130,7 +130,7 @@ class Popsgenie():
             limit (int, optional): limit for pagination. Defaults to 20.
 
         Returns:
-            page.PopsgeniePage: iterable that returns lists of PopsgenieUser objects
+            page.PopsgeniePage: iterable that returns lists of User objects
         """
         url_parts = [self.url_base, "users"]
         parameters: dict = {
@@ -151,6 +151,6 @@ class Popsgenie():
             session=self.session,
             url_base=self.url_base,
             url=url,
-            PopsgenieClass=api_classes.PopsgenieUser)
+            PopsgenieClass=resource.User)
 
         return pages

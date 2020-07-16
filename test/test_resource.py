@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
-import popsgenie.api_classes
+import popsgenie.resource
 
 
 class PopsgenieSchedule(unittest.TestCase):
@@ -26,12 +26,12 @@ class PopsgenieSchedule(unittest.TestCase):
         }
 
         # Act
-        schedule = popsgenie.api_classes.PopsgenieSchedule(
+        schedule = popsgenie.resource.Schedule(
             session, "xyz", **schedule_data
         )
 
         # Assert
-        self.assertIsInstance(schedule, popsgenie.api_classes.PopsgenieSchedule)
+        self.assertIsInstance(schedule, popsgenie.resource.Schedule)
 
 
 class PopsgenieRotation(unittest.TestCase):
@@ -58,10 +58,10 @@ class PopsgenieRotation(unittest.TestCase):
         }
 
         # Act
-        rotation = popsgenie.api_classes.PopsgenieRotation(session, "xyz", **data)
+        rotation = popsgenie.resource.Rotation(session, "xyz", **data)
 
         # Assert
-        self.assertIsInstance(rotation, popsgenie.api_classes.PopsgenieRotation)
+        self.assertIsInstance(rotation, popsgenie.resource.Rotation)
 
 
 class PopsgenieTeam(unittest.TestCase):
@@ -83,10 +83,10 @@ class PopsgenieTeam(unittest.TestCase):
         }
 
         # Act
-        team = popsgenie.api_classes.PopsgenieTeam(session, "xyz", **data)
+        team = popsgenie.resource.Team(session, "xyz", **data)
 
         # Assert
-        self.assertIsInstance(team, popsgenie.api_classes.PopsgenieTeam)
+        self.assertIsInstance(team, popsgenie.resource.Team)
 
 
 class PopsgenieUser(unittest.TestCase):
@@ -117,7 +117,7 @@ class PopsgenieUser(unittest.TestCase):
         }
 
         # Act
-        team = popsgenie.api_classes.PopsgenieTeam(session, "xyz", **data)
+        team = popsgenie.resource.Team(session, "xyz", **data)
 
         # Assert
-        self.assertIsInstance(team, popsgenie.api_classes.PopsgenieTeam)
+        self.assertIsInstance(team, popsgenie.resource.Team)

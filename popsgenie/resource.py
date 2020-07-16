@@ -7,15 +7,15 @@ from typing import Dict, List, Optional, Union
 import requests
 
 
-class PopsgenieBase(ABC):
-    """Base class used to represent datatypes returned
+class Base(ABC):
+    """Base class used to represent resources returned
     by the Opsgenie API https://docs.opsgenie.com/docs/api-overview
     At a minimum each subclass is required to implement
     self.lookup_attributes and skip_attributes as empty lists.
-    The subclass's attributes reflect the fields returned by
+    The subclass's attributes reflect the resource's fields returned by
     Opsgenie *except* when the attribute is included in skip_attributes.
     If on initialization an instance of a subclass did not recieve data, for an attribute,
-    it will be queried if the attribute's name is included in self.lookup_attributes.
+    data will be queried if the attribute's name is included in self.lookup_attributes.
     """
     def __init__(
             self,
@@ -151,7 +151,7 @@ class PopsgenieBase(ABC):
         return url
 
 
-class PopsgenieSchedule(PopsgenieBase):
+class Schedule(Base):
     """Class representing a Schedule in Opsgenie
     https://docs.opsgenie.com/docs/schedule-api
     """
@@ -159,9 +159,9 @@ class PopsgenieSchedule(PopsgenieBase):
     resource_name = 'schedules'
 
     def __init__(self, *args, **kwargs):
-        self.__team: Optional[PopsgenieTeam] = None
-        self.__on_calls: Optional[List['PopsgenieUser']] = None
-        self.__rotations: Optional[List[PopsgenieRotation]] = None
+        self.__team: Optional[Team] = None
+        self.__on_calls: Optional[List['User']] = None
+        self.__rotations: Optional[List[Rotation]] = None
 
         self.lookup_attributes = [
             'name',
@@ -175,7 +175,7 @@ class PopsgenieSchedule(PopsgenieBase):
         super().__init__(*args, resource_name=self.resource_name, **kwargs)
 
     @property
-    def rotations(self) -> List['PopsgenieRotation']:
+    def rotations(self) -> List['Rotation']:
         """Returns the raw data for a Opsgenie rotation
         associated with a schedule
 
@@ -185,19 +185,19 @@ class PopsgenieSchedule(PopsgenieBase):
         if self.__rotations is None:
             self.query_attributes(self.resource_url())
             self.__rotations = [
-                PopsgenieRotation(self.session, self.opsgenie_url, **rotation_data)
+                Rotation(self.session, self.opsgenie_url, **rotation_data)
                 for rotation_data in self._context['rotations']
             ]
 
         return self.__rotations
 
     @property
-    def team(self) -> 'PopsgenieTeam':
+    def team(self) -> 'Team':
         """Query Opsgenie for the team associated with a
-        schedule and convert raw data to PopsgenieTeam
+        schedule and convert raw data to Team
 
         Returns:
-            PopsgenieTeam: an object representing a Team
+            Team: an object representing a Team
                 in Opsgenie
         """
         if self.__team is None:
@@ -208,16 +208,16 @@ class PopsgenieSchedule(PopsgenieBase):
             self.logger.debug("url=%s", url)
 
             response = self.session.get(url)
-            self.__team = PopsgenieTeam(self.session, self.opsgenie_url, **response.json()['data'])
+            self.__team = Team(self.session, self.opsgenie_url, **response.json()['data'])
 
         return self.__team
 
     @property
-    def on_calls(self) -> List['PopsgenieUser']:
+    def on_calls(self) -> List['User']:
         """Retrieve users on call for a Schedule
 
         Returns:
-            List[PopsgenieUser]: Users on call in a schedule
+            List[User]: Users on call in a schedule
         """
         if self.__on_calls is None:
             url = "/".join(
@@ -228,14 +228,14 @@ class PopsgenieSchedule(PopsgenieBase):
             response = self.session.get(url)
 
             self.__on_calls = [
-                PopsgenieUser(self.session, self.opsgenie_url, **user_data)
+                User(self.session, self.opsgenie_url, **user_data)
                 for user_data in response.json()['data']['onCallParticipants']
             ]
 
         return self.__on_calls
 
 
-class PopsgenieRotation(PopsgenieBase):
+class Rotation(Base):
     """Class representing a schedule's rotation in Opsgenie
     https://docs.opsgenie.com/docs/schedule-api#section-schedule-rotation-fields
 
@@ -244,19 +244,19 @@ class PopsgenieRotation(PopsgenieBase):
     logger = logging.getLogger(__name__)
 
     def __init__(self, *args, **kwargs):
-        self.__participants: Optional[List[Union['PopsgenieTeam', 'PopsgenieUser', dict]]] = None
+        self.__participants: Optional[List[Union['Team', 'User', dict]]] = None
         self.lookup_attributes = []
         self.skip_attributes = ['participants']
 
         super().__init__(*args, **kwargs)
 
     @property
-    def participants(self) -> List[Union['PopsgenieTeam', 'PopsgenieUser', dict]]:
+    def participants(self) -> List[Union['Team', 'User', dict]]:
         """Retrive a list of Opsgenie Users associated
         with the rotation
 
         Returns:
-            List[PopsgenieUser]: List containing Opsgenie
+            List[User]: List containing Opsgenie
             users
         """
         if self.__participants is None:
@@ -265,10 +265,10 @@ class PopsgenieRotation(PopsgenieBase):
             for participant in self._context.get('participants', []):
                 if participant['type'] == 'user':
                     self.__participants.append(
-                        PopsgenieUser(self.session, self.opsgenie_url, **participant))
+                        User(self.session, self.opsgenie_url, **participant))
                 elif participant['type'] == 'team':
                     self.__participants.append(
-                        PopsgenieTeam(self.session, self.opsgenie_url, **participant))
+                        Team(self.session, self.opsgenie_url, **participant))
                 else:
                     # Haven't witnessed participant['type'] == [escalation | none]
                     # For now, I have to punt and return the dict
@@ -277,7 +277,7 @@ class PopsgenieRotation(PopsgenieBase):
         return self.__participants
 
 
-class PopsgenieTeam(PopsgenieBase):
+class Team(Base):
     """Class representing a Team in Opsgenie
     https://docs.opsgenie.com/docs/team-api
     """
@@ -285,7 +285,7 @@ class PopsgenieTeam(PopsgenieBase):
     resource_name = 'teams'
 
     def __init__(self, *args, **kwargs):
-        self.__members: Optional[List['PopsgenieUser']] = None
+        self.__members: Optional[List['User']] = None
 
         self.lookup_attributes = [
             'name',
@@ -298,25 +298,25 @@ class PopsgenieTeam(PopsgenieBase):
         super().__init__(*args, resource_name=self.resource_name, **kwargs)
 
     @property
-    def members(self) -> List['PopsgenieUser']:
+    def members(self) -> List['User']:
         """Retrive a list of Opsgenie Users associated
         with the team
 
         Returns:
-            List[PopsgenieUser]: List containing Opsgenie
+            List[User]: List containing Opsgenie
             users associated with a team
         """
         if self.__members is None:
             self.query_attributes(self.resource_url())
             self.__members = [
-                PopsgenieUser(self.session, self.opsgenie_url, **member['user'])
+                User(self.session, self.opsgenie_url, **member['user'])
                 for member in self._context.get('members', [])
             ]
 
         return self.__members
 
 
-class PopsgenieUser(PopsgenieBase):
+class User(Base):
     """Class representing a User in in Opsgenie
     https://docs.opsgenie.com/docs/user-api
     """
