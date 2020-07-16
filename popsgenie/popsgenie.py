@@ -37,7 +37,7 @@ class Popsgenie():
             identifier: str = None,
             identifier_type: str = None,
             offset: int = 0,
-            limit: int = 20) -> tool.PopsgeniePage:
+            limit: int = 20) -> tool.Pages:
         """List opsgenie schedules in the form of PopsgenieSchedule objects
 
         Args:
@@ -65,7 +65,7 @@ class Popsgenie():
         url = "/".join(url_parts)
         url = url + '?' + query_string
 
-        pages = tool.PopsgeniePage(
+        pages = tool.Pages(
             session=self.session,
             url_base=self.url_base,
             url=url,
@@ -78,7 +78,7 @@ class Popsgenie():
             identifier: str = None,
             identifier_type: str = None,
             offset: int = 0,
-            limit: int = 20) -> tool.PopsgeniePage:
+            limit: int = 20) -> tool.Pages:
         """List opsgenie teams in the form of PopsgenieTeam objects
 
         Args:
@@ -106,7 +106,7 @@ class Popsgenie():
         url = "/".join(url_parts)
         url = url + '?' + query_string
 
-        pages = tool.PopsgeniePage(
+        pages = tool.Pages(
             session=self.session,
             url_base=self.url_base,
             url=url,
@@ -119,7 +119,7 @@ class Popsgenie():
             identifier: str = None,
             identifier_type: str = None,
             offset: int = 0,
-            limit: int = 20) -> tool.PopsgeniePage:
+            limit: int = 20) -> tool.Pages:
         """List opsgenie users in the form of PopsgenieUser objects
 
         Args:
@@ -147,7 +147,7 @@ class Popsgenie():
         url = "/".join(url_parts)
         url = url + '?' + query_string
 
-        pages = tool.PopsgeniePage(
+        pages = tool.Pages(
             session=self.session,
             url_base=self.url_base,
             url=url,

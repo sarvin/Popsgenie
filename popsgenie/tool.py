@@ -3,7 +3,7 @@ import logging
 
 import requests
 
-class PopsgeniePage():
+class Pages():
     """Class for paging over Opsgenie data"""
     logger = logging.getLogger(__name__)
 

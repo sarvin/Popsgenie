@@ -131,7 +131,7 @@ class PopsgeniePage(unittest.TestCase):
             response_2,
         ]
 
-        pages = popsgenie.tool.PopsgeniePage(
+        pages = popsgenie.tool.Pages(
             session,
             "https://api.opsgenie.com/v2",
             "https://api.opsgenie.com/v2/users?limit=2&offset=2",
@@ -181,7 +181,7 @@ class PopsgeniePage(unittest.TestCase):
             "requestId": self.random_id(),
         }
 
-        pages = popsgenie.tool.PopsgeniePage(
+        pages = popsgenie.tool.Pages(
             session,
             "https://api.opsgenie.com/v2",
             f"https://api.opsgenie.com/v2/schedules/{schedule_id}?offset=0&limit=20&identifierType=id",
@@ -237,7 +237,7 @@ class PopsgeniePage(unittest.TestCase):
             "took": 0.158,
         }
 
-        pages = popsgenie.tool.PopsgeniePage(
+        pages = popsgenie.tool.Pages(
             session,
             "https://api.opsgenie.com/v2",
             f"https://api.opsgenie.com/v2/teams/{team_id}?offset=0&limit=20&identifierType=id",
@@ -287,7 +287,7 @@ class PopsgeniePage(unittest.TestCase):
             "took": 0.011,
         }
 
-        pages = popsgenie.tool.PopsgeniePage(
+        pages = popsgenie.tool.Pages(
             session,
             "https://api.opsgenie.com/v2",
             f"https://api.opsgenie.com/v2/users/{user_id}?offset=0&limit=20&identifierType=id",
