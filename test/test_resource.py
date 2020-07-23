@@ -123,7 +123,7 @@ class PopsgenieUser(unittest.TestCase):
         }
 
         # Act
-        team = popsgenie.resource.Team(connection, **data)
+        user = popsgenie.resource.User(connection, **data)
 
         # Assert
-        self.assertIsInstance(team, popsgenie.resource.Team)
+        self.assertIsInstance(user, popsgenie.resource.User)

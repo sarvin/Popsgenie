@@ -135,7 +135,7 @@ class Popsgenie():
         url = url + '?' + query_string
 
         pages = tool.Pages(
-            connection=self.connection.session,
+            connection=self.connection,
             url=url,
             PopsgenieClass=resource.User)
 

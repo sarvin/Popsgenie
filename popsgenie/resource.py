@@ -47,11 +47,13 @@ class Base(ABC):
         # this can get updated after a web request
         self._context = kwargs
 
-        for key in kwargs:
-            if key not in self.skip_attributes:
-                try:
-                    setattr(self, key, kwargs[key])
-                except AttributeError as error:
+        for key, value in kwargs.items():
+            try:
+                setattr(self, key, value)
+            except AttributeError as error:
+                if key in dir(self):
+                    pass
+                else:
                     raise AttributeError(f"{error}: {key}")
 
     def __repr__(self):
@@ -90,11 +92,13 @@ class Base(ABC):
         self._context = json['data']
 
         for key in json['data'].keys():
-            if key not in self.skip_attributes:
-                try:
-                    setattr(self, key, response.json()['data'][key])
-                except AttributeError:
-                    raise AttributeError(f"can't set attribute: {key}")
+            try:
+                setattr(self, key, kwargs[key])
+            except AttributeError as error:
+                if key in dir(self):
+                    pass
+                else:
+                    raise AttributeError(f"{error}: {key}")
 
     def resource_url(self) -> str:
         """String declaring the resource's API endpoing
