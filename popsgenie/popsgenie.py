@@ -8,6 +8,7 @@ from . import resource, tool
 
 #logger = logging.getLogger('popsgenie')
 
+
 class Popsgenie():
     """Class for querying Opsgenie at API level"""
     logger = logging.getLogger(__name__)
@@ -18,19 +19,7 @@ class Popsgenie():
             {"Authorization": api_key}
         )
 
-        self.__session = session
-
-        self.url_base = opsgenie_url
-
-    @property
-    def session(self) -> requests.sessions.Session:
-        """Get a pre-authorized session object for repeated queries
-
-        Returns:
-            requests.sessions.Session -- a pre-authenticated session
-            object used to query Opsgenie's API
-        """
-        return self.__session
+        self.connection = tool.Connection(session=session, url_base=opsgenie_url)
 
     def schedules(
             self,
@@ -50,7 +39,7 @@ class Popsgenie():
         Returns:
             page.PopsgeniePage: iterable that returns lists of Schedule objects
         """
-        url_parts = [self.url_base, "schedules"]
+        url_parts = [self.connection.url_base, "schedules"]
         parameters: dict = {
             "offset": offset,
             "limit": limit}
@@ -66,8 +55,7 @@ class Popsgenie():
         url = url + '?' + query_string
 
         pages = tool.Pages(
-            session=self.session,
-            url_base=self.url_base,
+            connection=self.connection,
             url=url,
             PopsgenieClass=resource.Schedule)
 
@@ -91,7 +79,7 @@ class Popsgenie():
         Returns:
             page.PopsgeniePage: iterable that returns lists of Team objects
         """
-        url_parts = [self.url_base, "teams"]
+        url_parts = [self.connection.url_base, "teams"]
         parameters: dict = {
             "offset": offset,
             "limit": limit}
@@ -107,8 +95,7 @@ class Popsgenie():
         url = url + '?' + query_string
 
         pages = tool.Pages(
-            session=self.session,
-            url_base=self.url_base,
+            connection=self.connection,
             url=url,
             PopsgenieClass=resource.Team)
 
@@ -132,7 +119,7 @@ class Popsgenie():
         Returns:
             page.PopsgeniePage: iterable that returns lists of User objects
         """
-        url_parts = [self.url_base, "users"]
+        url_parts = [self.connection.url_base, "users"]
         parameters: dict = {
             "offset": offset,
             "limit": limit}
@@ -148,8 +135,7 @@ class Popsgenie():
         url = url + '?' + query_string
 
         pages = tool.Pages(
-            session=self.session,
-            url_base=self.url_base,
+            connection=self.connection,
             url=url,
             PopsgenieClass=resource.User)
 

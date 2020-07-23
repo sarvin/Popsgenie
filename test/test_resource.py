@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import Mock
 
+import popsgenie.tool
 import popsgenie.resource
 
 
@@ -10,7 +11,9 @@ class PopsgenieSchedule(unittest.TestCase):
         can properly instantiate a Schedule object
         """
         # Arrange
+
         session = Mock()
+        connection = popsgenie.tool.Connection(session, 'xyz')
 
         schedule_data = {
             "id": "0d4w397f-10j7-k8ht-zx92-06796bc00cbd",
@@ -27,7 +30,7 @@ class PopsgenieSchedule(unittest.TestCase):
 
         # Act
         schedule = popsgenie.resource.Schedule(
-            session, "xyz", **schedule_data
+            connection, **schedule_data
         )
 
         # Assert
@@ -41,6 +44,7 @@ class PopsgenieRotation(unittest.TestCase):
         """
         # Arrange
         session = Mock()
+        connection = popsgenie.tool.Connection(session, 'xyz')
 
         data = {
             "id": "0d4w397f-10j7-k8ht-zx92-06796bc00cbd",
@@ -58,7 +62,7 @@ class PopsgenieRotation(unittest.TestCase):
         }
 
         # Act
-        rotation = popsgenie.resource.Rotation(session, "xyz", **data)
+        rotation = popsgenie.resource.Rotation(connection, **data)
 
         # Assert
         self.assertIsInstance(rotation, popsgenie.resource.Rotation)
@@ -71,6 +75,7 @@ class PopsgenieTeam(unittest.TestCase):
         """
         # Arrange
         session = Mock()
+        connection = popsgenie.tool.Connection(session, 'xyz')
 
         data = {
             "id": "0d4w397f-10j7-k8ht-zx92-06796bc00cbd",
@@ -83,7 +88,7 @@ class PopsgenieTeam(unittest.TestCase):
         }
 
         # Act
-        team = popsgenie.resource.Team(session, "xyz", **data)
+        team = popsgenie.resource.Team(connection, **data)
 
         # Assert
         self.assertIsInstance(team, popsgenie.resource.Team)
@@ -96,6 +101,7 @@ class PopsgenieUser(unittest.TestCase):
         """
         # Arrange
         session = Mock()
+        connection = popsgenie.tool.Connection(session, 'xyz')
 
         data = {
             "blocked": False,
@@ -117,7 +123,7 @@ class PopsgenieUser(unittest.TestCase):
         }
 
         # Act
-        team = popsgenie.resource.Team(session, "xyz", **data)
+        user = popsgenie.resource.User(connection, **data)
 
         # Assert
-        self.assertIsInstance(team, popsgenie.resource.Team)
+        self.assertIsInstance(user, popsgenie.resource.User)

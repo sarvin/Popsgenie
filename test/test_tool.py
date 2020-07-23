@@ -3,11 +3,11 @@ import string
 import unittest
 from unittest.mock import Mock
 
-import popsgenie.resource
 import popsgenie.tool
+import popsgenie.resource
 
 
-class PopsgeniePage(unittest.TestCase):
+class Page(unittest.TestCase):
     def random_id(self):
         random_string = "".join(
             random.choices(string.ascii_lowercase + string.digits, k=32)
@@ -131,9 +131,10 @@ class PopsgeniePage(unittest.TestCase):
             response_2,
         ]
 
+        connection = popsgenie.tool.Connection(session, 'https://api.opsgenie.com/v2')
+
         pages = popsgenie.tool.Pages(
-            session,
-            "https://api.opsgenie.com/v2",
+            connection,
             "https://api.opsgenie.com/v2/users?limit=2&offset=2",
             popsgenie.resource.User,
         )
@@ -181,9 +182,10 @@ class PopsgeniePage(unittest.TestCase):
             "requestId": self.random_id(),
         }
 
+        connection = popsgenie.tool.Connection(session, 'https://api.opsgenie.com/v2')
+
         pages = popsgenie.tool.Pages(
-            session,
-            "https://api.opsgenie.com/v2",
+            connection,
             f"https://api.opsgenie.com/v2/schedules/{schedule_id}?offset=0&limit=20&identifierType=id",
             popsgenie.resource.Schedule,
         )
@@ -206,6 +208,7 @@ class PopsgeniePage(unittest.TestCase):
         # Arrange
         team_id = self.random_id()
         session = Mock()
+
         response = session.get.return_value
         response.json.return_value = {
             "data": {
@@ -237,9 +240,10 @@ class PopsgeniePage(unittest.TestCase):
             "took": 0.158,
         }
 
+        connection = popsgenie.tool.Connection(session, 'https://api.opsgenie.com/v2')
+
         pages = popsgenie.tool.Pages(
-            session,
-            "https://api.opsgenie.com/v2",
+            connection,
             f"https://api.opsgenie.com/v2/teams/{team_id}?offset=0&limit=20&identifierType=id",
             popsgenie.resource.Team,
         )
@@ -262,6 +266,7 @@ class PopsgeniePage(unittest.TestCase):
         # Arrange
         user_id = self.random_id()
         session = Mock()
+        connection = popsgenie.tool.Connection(session, 'https://api.opsgenie.com/v2')
         response = session.get.return_value
         response.json.return_value = {
             "data": {
@@ -288,8 +293,7 @@ class PopsgeniePage(unittest.TestCase):
         }
 
         pages = popsgenie.tool.Pages(
-            session,
-            "https://api.opsgenie.com/v2",
+            connection,
             f"https://api.opsgenie.com/v2/users/{user_id}?offset=0&limit=20&identifierType=id",
             popsgenie.resource.User,
         )

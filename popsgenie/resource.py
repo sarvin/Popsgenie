@@ -2,9 +2,10 @@
 from abc import ABC
 import datetime
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, TYPE_CHECKING, Union
 
-import requests
+if TYPE_CHECKING:
+    import tool
 
 
 class Base(ABC):
@@ -19,8 +20,7 @@ class Base(ABC):
     """
     def __init__(
             self,
-            session: requests.sessions.Session,
-            opsgenie_url: str,
+            connection: 'tool.Connection',
             resource_name: str = None,
             **kwargs):
         """Abstract class for Opsgenie resources
@@ -39,8 +39,7 @@ class Base(ABC):
             AttributeError: thrown when an attribute already exists and cannot be
                 added during instance init.
         """
-        self.__session = session
-        self.opsgenie_url = opsgenie_url
+        self.connection = connection
         self.__resource_name: Optional[str] = resource_name
 
 
@@ -48,47 +47,17 @@ class Base(ABC):
         # this can get updated after a web request
         self._context = kwargs
 
-        for key in kwargs:
-            if key not in self.skip_attributes:
-                try:
-                    setattr(self, key, kwargs[key])
-                except AttributeError as error:
+        for key, value in kwargs.items():
+            try:
+                setattr(self, key, value)
+            except AttributeError as error:
+                if key in dir(self):
+                    pass
+                else:
                     raise AttributeError(f"{error}: {key}")
 
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.id)
-
-    @property
-    def lookup_attributes(self) -> List[str]:
-        """list of object attributes that
-        may not exist but can be queried from provider
-        """
-        return self.__lookup_attributes
-
-    @lookup_attributes.setter
-    def lookup_attributes(self, attribute_names: List[str]):
-        """Declare a list of attributes that should be queried,
-        from provider, and stored as object attributes
-        """
-        self.__lookup_attributes = attribute_names
-
-    @property
-    def skip_attributes(self) -> List[str]:
-        """store list of attributes that should skipped
-        when exposing attributes through self.attribute.
-        This allows us to create a method/property with the
-        same name as the attribute.
-        """
-        return self.__skip_attributes
-
-    @skip_attributes.setter
-    def skip_attributes(self, attribute_names: List[str]):
-        """Declare a list of attributes that should skipped
-        when exposing attributes through self.<attribute>.
-        This allows us to create a method/property with the
-        same name as the attribute.
-        """
-        self.__skip_attributes = attribute_names
 
     def __getattr__(self, key: str):
         """Some attributes are pre-set when the object is instantiated.
@@ -100,16 +69,6 @@ class Base(ABC):
             self.query_attributes(self.resource_url())
 
         return self.__getattribute__(key)
-
-    @property
-    def session(self) -> requests.sessions.Session:
-        """Get a pre-authorized session object for repeated queries
-
-        Returns:
-            requests.sessions.Session -- a pre-authenticated session
-            object used to query Opsgenie's API
-        """
-        return self.__session
 
     def query_attributes(self, context_url: str, **kwargs):
         """Used for importing data from Opsgenie to set an object's
@@ -126,18 +85,20 @@ class Base(ABC):
         """
         self.logger.debug("url=%s", context_url)
 
-        response = self.session.get(context_url, **kwargs)
+        response = self.connection.session.get(context_url, **kwargs)
         json = response.json()
 
         # Update our context with the latest information
         self._context = json['data']
 
-        for key in json['data'].keys():
-            if key not in self.skip_attributes:
-                try:
-                    setattr(self, key, response.json()['data'][key])
-                except AttributeError:
-                    raise AttributeError(f"can't set attribute: {key}")
+        for key, value in json['data'].items():
+            try:
+                setattr(self, key, value)
+            except AttributeError as error:
+                if key in dir(self):
+                    pass
+                else:
+                    raise AttributeError(f"{error}: {key}")
 
     def resource_url(self) -> str:
         """String declaring the resource's API endpoing
@@ -146,7 +107,7 @@ class Base(ABC):
             str: value suitable for querying resource data
         """
         url = "/".join(
-            [self.opsgenie_url, self.__resource_name, self.id]) # type: ignore
+            [self.connection.url_base, self.__resource_name, self.id]) # type: ignore
 
         return url
 
@@ -170,7 +131,6 @@ class Schedule(Base):
             'enabled',
             'ownerTeam',
         ]
-        self.skip_attributes = ['rotations']
 
         super().__init__(*args, resource_name=self.resource_name, **kwargs)
 
@@ -185,7 +145,7 @@ class Schedule(Base):
         if self.__rotations is None:
             self.query_attributes(self.resource_url())
             self.__rotations = [
-                Rotation(self.session, self.opsgenie_url, **rotation_data)
+                Rotation(self.connection, **rotation_data)
                 for rotation_data in self._context['rotations']
             ]
 
@@ -202,13 +162,13 @@ class Schedule(Base):
         """
         if self.__team is None:
             url = "/".join(
-                [self.opsgenie_url, "teams", self.ownerTeam['id']]
+                [self.connection.url_base, "teams", self.ownerTeam['id']]
             )
 
             self.logger.debug("url=%s", url)
 
-            response = self.session.get(url)
-            self.__team = Team(self.session, self.opsgenie_url, **response.json()['data'])
+            response = self.connection.session.get(url)
+            self.__team = Team(self.connection, **response.json()['data'])
 
         return self.__team
 
@@ -225,10 +185,10 @@ class Schedule(Base):
 
             self.logger.debug("url=%s", url)
 
-            response = self.session.get(url)
+            response = self.connection.session.get(url)
 
             self.__on_calls = [
-                User(self.session, self.opsgenie_url, **user_data)
+                User(self.connection, **user_data)
                 for user_data in response.json()['data']['onCallParticipants']
             ]
 
@@ -265,10 +225,10 @@ class Rotation(Base):
             for participant in self._context.get('participants', []):
                 if participant['type'] == 'user':
                     self.__participants.append(
-                        User(self.session, self.opsgenie_url, **participant))
+                        User(self.connection, **participant))
                 elif participant['type'] == 'team':
                     self.__participants.append(
-                        Team(self.session, self.opsgenie_url, **participant))
+                        Team(self.connection, **participant))
                 else:
                     # Haven't witnessed participant['type'] == [escalation | none]
                     # For now, I have to punt and return the dict
@@ -309,7 +269,7 @@ class Team(Base):
         if self.__members is None:
             self.query_attributes(self.resource_url())
             self.__members = [
-                User(self.session, self.opsgenie_url, **member['user'])
+                User(self.connection, **member['user'])
                 for member in self._context.get('members', [])
             ]
 
@@ -385,7 +345,7 @@ class User(Base):
 
             self.logger.debug("url=%s", url)
 
-            response = self.session.get(url)
+            response = self.connection.session.get(url)
 
             self.__contacts = response.json()['data']
 
