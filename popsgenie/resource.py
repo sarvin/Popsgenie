@@ -91,9 +91,9 @@ class Base(ABC):
         # Update our context with the latest information
         self._context = json['data']
 
-        for key in json['data'].keys():
+        for key, value in json['data'].items():
             try:
-                setattr(self, key, kwargs[key])
+                setattr(self, key, value)
             except AttributeError as error:
                 if key in dir(self):
                     pass
@@ -131,7 +131,6 @@ class Schedule(Base):
             'enabled',
             'ownerTeam',
         ]
-        self.skip_attributes = ['rotations']
 
         super().__init__(*args, resource_name=self.resource_name, **kwargs)
 
