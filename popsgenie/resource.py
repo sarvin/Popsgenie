@@ -112,6 +112,56 @@ class Base(ABC):
         return url
 
 
+class Alert(Base):
+    """Class representing a Alert in Opsgenie
+    https://docs.opsgenie.com/docs/alert-api
+    """
+    logger = logging.getLogger(__name__)
+    resource_name = 'alerts'
+
+    def __init__(self, *args, **kwargs):
+        self.__responders: Optional[List[Union['Schedule', 'Team', 'User', dict]]] = None
+
+        self.lookup_attributes = ['responders']
+
+        super().__init__(*args, resource_name=self.resource_name, **kwargs)
+
+    @property
+    def responders(self) -> List[Union['Schedule', 'Team', 'User', dict]]:
+        """Teams, users, escalations and schedules
+        that the alert will be routed to send notifications.
+
+        Returns:
+            List[Union['Schedule', 'Team', 'User', dict]]: A list of Popsgenie resources
+                or a dict if responder is of type escalation
+        """
+        if self.__responders is None:
+            self.__responders = []
+
+            for responder in self._context.get('responders', []):
+                if responder['type'] == 'user':
+                    responder.pop("type")
+
+                    self.__responders.append(
+                        User(self.connection, **responder))
+                elif responder['type'] == 'team':
+                    responder.pop("type")
+
+                    self.__responders.append(
+                        Team(self.connection, **responder))
+                elif responder['type'] == 'schedule':
+                    responder.pop("type")
+
+                    self.__responders.append(
+                        Schedule(self.connection, **responder))
+                else:
+                    # Haven't witnessed responder['type'] == [escalation]
+                    # For now, I have to punt and return the dict
+                    self.__responders.append(responder)
+
+        return self.__responders
+
+
 class Schedule(Base):
     """Class representing a Schedule in Opsgenie
     https://docs.opsgenie.com/docs/schedule-api
