@@ -1,8 +1,70 @@
+import random
+import string
 import unittest
 from unittest.mock import Mock
 
 import popsgenie.tool
 import popsgenie.resource
+import popsgenie
+
+def random_id():
+    random_string = "".join(
+        random.choices(string.ascii_lowercase + string.digits, k=32)
+    )
+
+    random_id = (
+        f"{random_string[0:8]}-{random_string[8:12]}-"
+        f"{random_string[12:16]}-{random_string[16:20]}-"
+        f"{random_string[20:None]}"
+    )
+
+    return random_id
+
+
+class Alert(unittest.TestCase):
+    def test_initialization_with_list_data(self):
+        # Arrange
+        session = Mock()
+        connection = popsgenie.tool.Connection(session, "xyz")
+
+        alert_id = random_id()
+
+        alert_data = {
+            "seen": True,
+            "id": alert_id,
+            "tinyId": "6928",
+            "alias": "ABC.DEF.NOTREAL.NET: Blocking SQL Exceeded Max Runtime",
+            "message": "ABC.DEF.NOTREAL.NET: Blocking SQL Exceeded Max Runtime",
+            "status": "open",
+            "acknowledged": True,
+            "isSeen": True,
+            "tags": [],
+            "snoozed": False,
+            "count": 2,
+            "lastOccurredAt": "2020-07-23T01:22:29.608Z",
+            "createdAt": "2020-07-23T01:01:47.006Z",
+            "updatedAt": "2020-07-23T02:02:32.378Z",
+            "source": "Email",
+            "owner": "jhetfield@notreal.net",
+            "priority": "P3",
+            "teams": [{"id": random_id()}],
+            "responders": [
+                {"type": "team", "id": random_id()}
+            ],
+            "integration": {
+                "id": random_id(),
+                "name": "team integration email",
+                "type": "Email",
+            },
+            "report": {"ackTime": 348626, "acknowledgedBy": "jhetfield@notreal.net"},
+            "ownerTeamId": random_id(),
+        }
+
+        # Act
+        alert = popsgenie.resource.Alert(connection, **alert_data)
+
+        # Assert
+        self.assertIsInstance(alert, popsgenie.resource.Alert)
 
 
 class PopsgenieSchedule(unittest.TestCase):
@@ -13,7 +75,7 @@ class PopsgenieSchedule(unittest.TestCase):
         # Arrange
 
         session = Mock()
-        connection = popsgenie.tool.Connection(session, 'xyz')
+        connection = popsgenie.tool.Connection(session, "xyz")
 
         schedule_data = {
             "id": "0d4w397f-10j7-k8ht-zx92-06796bc00cbd",
@@ -29,9 +91,7 @@ class PopsgenieSchedule(unittest.TestCase):
         }
 
         # Act
-        schedule = popsgenie.resource.Schedule(
-            connection, **schedule_data
-        )
+        schedule = popsgenie.resource.Schedule(connection, **schedule_data)
 
         # Assert
         self.assertIsInstance(schedule, popsgenie.resource.Schedule)
@@ -44,7 +104,7 @@ class PopsgenieRotation(unittest.TestCase):
         """
         # Arrange
         session = Mock()
-        connection = popsgenie.tool.Connection(session, 'xyz')
+        connection = popsgenie.tool.Connection(session, "xyz")
 
         data = {
             "id": "0d4w397f-10j7-k8ht-zx92-06796bc00cbd",
@@ -75,7 +135,7 @@ class PopsgenieTeam(unittest.TestCase):
         """
         # Arrange
         session = Mock()
-        connection = popsgenie.tool.Connection(session, 'xyz')
+        connection = popsgenie.tool.Connection(session, "xyz")
 
         data = {
             "id": "0d4w397f-10j7-k8ht-zx92-06796bc00cbd",
@@ -101,7 +161,7 @@ class PopsgenieUser(unittest.TestCase):
         """
         # Arrange
         session = Mock()
-        connection = popsgenie.tool.Connection(session, 'xyz')
+        connection = popsgenie.tool.Connection(session, "xyz")
 
         data = {
             "blocked": False,
