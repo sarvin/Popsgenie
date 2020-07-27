@@ -162,6 +162,153 @@ class Alert(Base):
         return self.__responders
 
 
+class Escalation(Base):
+    """Class representing a Escalation in Opsgenie
+    https://docs.opsgenie.com/docs/escalation-api
+    """
+    logger = logging.getLogger(__name__)
+    resource_name = 'escalations'
+
+    def __init__(self, *args, **kwargs):
+        self.__rules: List[dict] = None
+        self.__owner_team = None
+
+        self.lookup_attributes = [
+            'name',
+            'description',
+        ]
+
+        super().__init__(*args, resource_name=self.resource_name, **kwargs)
+
+    @property
+    def rules(self) -> List[dict]:
+        """Dictionary of data describing an escalation's rules.
+        rule's recipient is replaced with a corresponding Popsgenie resource
+
+        Returns:
+            List[dict]: dictionary describing Opsgenie rules
+        """
+        if self.__rules is None:
+            self.__rules = []
+
+            for rule in self._context.get('rules', {}):
+                if rule['recipient']['type'] == 'schedule':
+                    rule['recipient'].pop("type")
+
+                    rule['recipient'] = Schedule(self.connection, **rule['recipient'])
+
+                    self.__rules.append(rule)
+                elif rule['recipient']['type'] == 'user':
+                    rule['recipient'].pop("type")
+
+                    rule['recipient'] = User(self.connection, **rule['recipient'])
+
+                    self.__rules.append(rule)
+                elif rule['recipient']['type'] == 'team':
+                    rule['recipient'].pop("type")
+
+                    rule['recipient'] = Team(self.connection, **rule['recipient'])
+
+                    self.__rules.append(rule)
+                else:
+                    # For now, I have to punt and return the dict
+                    self.__rules.append(rule)
+
+        return self.__rules
+
+    @property
+    def owner_team(self) -> 'Team':
+        """Property representing a escalation's owning team
+
+        Returns:
+            [Team]: A team owning the escalation policy
+        """
+        if self.__owner_team is None and self._context.get('ownerTeam'):
+            self.__owner_team = Team(self.connection, **self._context['ownerTeam'])
+
+        return self.__owner_team
+
+
+class Incident(Base):
+    """Class representing a incident in Opsgenie
+    https://docs.opsgenie.com/docs/incident-api#get-incident
+
+    This class makes no external queries
+    """
+    logger = logging.getLogger(__name__)
+
+    def __init__(self, *args, **kwargs):
+        self.__responders: Optional[List[Union['User', 'Team']]] = None
+
+        super().__init__(*args, **kwargs)
+
+    @property
+    def responders(self) -> List[Union['User', 'Team']]:
+        """Users, teams that the incident will be routed to send notifications.
+
+        Returns:
+            List[Union['User', 'Team']]: A list of Popsgenie resources
+        """
+        if self.__responders is None:
+            self.__responders = []
+
+            for responder in self._context.get('responders', []):
+                if responder['type'] == 'user':
+                    responder.pop("type")
+
+                    self.__responders.append(
+                        User(self.connection, **responder))
+                elif responder['type'] == 'team':
+                    responder.pop("type")
+
+                    self.__responders.append(
+                        Team(self.connection, **responder))
+
+        return self.__responders
+
+
+class Rotation(Base):
+    """Class representing a schedule's rotation in Opsgenie
+    https://docs.opsgenie.com/docs/schedule-api#section-schedule-rotation-fields
+
+    This class makes no external queries
+    """
+    logger = logging.getLogger(__name__)
+
+    def __init__(self, *args, **kwargs):
+        self.__participants: Optional[List[Union['Team', 'User', dict]]] = None
+        self.lookup_attributes = []
+        self.skip_attributes = ['participants']
+
+        super().__init__(*args, **kwargs)
+
+    @property
+    def participants(self) -> List[Union['Team', 'User', dict]]:
+        """Retrive a list of Opsgenie Users associated
+        with the rotation
+
+        Returns:
+            List[User]: List containing Opsgenie
+            users
+        """
+        if self.__participants is None:
+            self.__participants = []
+
+            for participant in self._context.get('participants', []):
+                if participant['type'] == 'user':
+                    self.__participants.append(
+                        User(self.connection, **participant))
+                elif participant['type'] == 'team':
+                    self.__participants.append(
+                        Team(self.connection, **participant))
+                else:
+                    # Haven't witnessed participant['type'] == [escalation | none]
+                    # For now, I have to punt and return the dict
+                    self.__participants.append(participant)
+
+        return self.__participants
+
+
 class Schedule(Base):
     """Class representing a Schedule in Opsgenie
     https://docs.opsgenie.com/docs/schedule-api
@@ -194,6 +341,7 @@ class Schedule(Base):
         """
         if self.__rotations is None:
             self.query_attributes(self.resource_url())
+
             self.__rotations = [
                 Rotation(self.connection, **rotation_data)
                 for rotation_data in self._context['rotations']
@@ -245,48 +393,6 @@ class Schedule(Base):
         return self.__on_calls
 
 
-class Rotation(Base):
-    """Class representing a schedule's rotation in Opsgenie
-    https://docs.opsgenie.com/docs/schedule-api#section-schedule-rotation-fields
-
-    This class makes no external queries
-    """
-    logger = logging.getLogger(__name__)
-
-    def __init__(self, *args, **kwargs):
-        self.__participants: Optional[List[Union['Team', 'User', dict]]] = None
-        self.lookup_attributes = []
-        self.skip_attributes = ['participants']
-
-        super().__init__(*args, **kwargs)
-
-    @property
-    def participants(self) -> List[Union['Team', 'User', dict]]:
-        """Retrive a list of Opsgenie Users associated
-        with the rotation
-
-        Returns:
-            List[User]: List containing Opsgenie
-            users
-        """
-        if self.__participants is None:
-            self.__participants = []
-
-            for participant in self._context.get('participants', []):
-                if participant['type'] == 'user':
-                    self.__participants.append(
-                        User(self.connection, **participant))
-                elif participant['type'] == 'team':
-                    self.__participants.append(
-                        Team(self.connection, **participant))
-                else:
-                    # Haven't witnessed participant['type'] == [escalation | none]
-                    # For now, I have to punt and return the dict
-                    self.__participants.append(participant)
-
-        return self.__participants
-
-
 class Team(Base):
     """Class representing a Team in Opsgenie
     https://docs.opsgenie.com/docs/team-api
@@ -334,6 +440,7 @@ class User(Base):
     resource_name = 'users'
 
     def __init__(self, *args, **kwargs):
+        breakpoint()
         self.__role = None
         self.__contacts: Optional[dict] = None
 

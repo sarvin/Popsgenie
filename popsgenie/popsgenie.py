@@ -21,6 +21,126 @@ class Popsgenie():
 
         self.connection = tool.Connection(session=session, url_base=opsgenie_url)
 
+    def alerts(
+            self,
+            identifier: str = None,
+            identifier_type: str = None,
+            offset: int = 0,
+            limit: int = 20) -> tool.Pages:
+        """List opsgenie alerts in the form of Alert objects
+
+        Args:
+            identifier (str, optional): The name or id of a alert. Defaults to None.
+            identifier_type (str, optional): The type of identifier used.
+                Values are either 'name' or 'id'. Defaults to None.
+            offset (int, optional): offset for pagination. Defaults to 0.
+            limit (int, optional): limit for pagination. Defaults to 20.
+
+        Returns:
+            page.PopsgeniePage: iterable that returns lists of Alert objects
+        """
+        url_parts = [self.connection.url_base, "alerts"]
+        parameters: dict = {
+            "offset": offset,
+            "limit": limit}
+
+        if identifier_type in ['id', 'name']:
+            parameters['identifierType'] = identifier_type
+        if identifier:
+            url_parts.append(parse.quote(identifier))
+
+        query_string = parse.urlencode(parameters)
+
+        url = "/".join(url_parts)
+        url = url + '?' + query_string
+
+        pages = tool.Pages(
+            connection=self.connection,
+            url=url,
+            PopsgenieClass=resource.Alert)
+
+        return pages
+
+    def escalations(
+            self,
+            identifier: str = None,
+            identifier_type: str = None,
+            offset: int = 0,
+            limit: int = 20) -> tool.Pages:
+        """List opsgenie escalations in the form of Escalation objects
+
+        Args:
+            identifier (str, optional): The name or id of a escalation. Defaults to None.
+            identifier_type (str, optional): The type of identifier used.
+                Values are either 'name' or 'id'. Defaults to None.
+            offset (int, optional): offset for pagination. Defaults to 0.
+            limit (int, optional): limit for pagination. Defaults to 20.
+
+        Returns:
+            page.PopsgeniePage: iterable that returns lists of Escalation objects
+        """
+        url_parts = [self.connection.url_base, "escalations"]
+        parameters: dict = {
+            "offset": offset,
+            "limit": limit}
+
+        if identifier_type in ['id', 'name']:
+            parameters['identifierType'] = identifier_type
+        if identifier:
+            url_parts.append(parse.quote(identifier))
+
+        query_string = parse.urlencode(parameters)
+
+        url = "/".join(url_parts)
+        url = url + '?' + query_string
+
+        pages = tool.Pages(
+            connection=self.connection,
+            url=url,
+            PopsgenieClass=resource.Escalation)
+
+        return pages
+
+    def incidents(
+            self,
+            identifier: str = None,
+            identifier_type: str = None,
+            offset: int = 0,
+            limit: int = 20) -> tool.Pages:
+        """List opsgenie escalations in the form of Escalation objects
+
+        Args:
+            identifier (str, optional): The name or id of a escalation. Defaults to None.
+            identifier_type (str, optional): The type of identifier used.
+                Values are either 'name' or 'id'. Defaults to None.
+            offset (int, optional): offset for pagination. Defaults to 0.
+            limit (int, optional): limit for pagination. Defaults to 20.
+
+        Returns:
+            page.PopsgeniePage: iterable that returns lists of Escalation objects
+        """
+        url_parts = ["https://api.opsgenie.com/v1/incidents"]
+        parameters: dict = {
+            "offset": offset,
+            "limit": limit}
+
+        if identifier_type in ['id', 'name']:
+            parameters['identifierType'] = identifier_type
+        if identifier:
+            url_parts.append(parse.quote(identifier))
+
+        query_string = parse.urlencode(parameters)
+
+        url = "/".join(url_parts)
+        url = url + '?' + query_string
+
+        pages = tool.Pages(
+            connection=self.connection,
+            url=url,
+            PopsgenieClass=resource.Incident)
+
+        return pages
+
     def schedules(
             self,
             identifier: str = None,
@@ -138,45 +258,5 @@ class Popsgenie():
             connection=self.connection,
             url=url,
             PopsgenieClass=resource.User)
-
-        return pages
-
-    def alerts(
-            self,
-            identifier: str = None,
-            identifier_type: str = None,
-            offset: int = 0,
-            limit: int = 20) -> tool.Pages:
-        """List opsgenie alerts in the form of Alert objects
-
-        Args:
-            identifier (str, optional): The name or id of a alert. Defaults to None.
-            identifier_type (str, optional): The type of identifier used.
-                Values are either 'name' or 'id'. Defaults to None.
-            offset (int, optional): offset for pagination. Defaults to 0.
-            limit (int, optional): limit for pagination. Defaults to 20.
-
-        Returns:
-            page.PopsgeniePage: iterable that returns lists of Alert objects
-        """
-        url_parts = [self.connection.url_base, "alerts"]
-        parameters: dict = {
-            "offset": offset,
-            "limit": limit}
-
-        if identifier_type in ['id', 'name']:
-            parameters['identifierType'] = identifier_type
-        if identifier:
-            url_parts.append(parse.quote(identifier))
-
-        query_string = parse.urlencode(parameters)
-
-        url = "/".join(url_parts)
-        url = url + '?' + query_string
-
-        pages = tool.Pages(
-            connection=self.connection,
-            url=url,
-            PopsgenieClass=resource.Alert)
 
         return pages
