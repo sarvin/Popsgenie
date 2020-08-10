@@ -440,7 +440,6 @@ class User(Base):
     resource_name = 'users'
 
     def __init__(self, *args, **kwargs):
-        breakpoint()
         self.__role = None
         self.__contacts: Optional[dict] = None
 
